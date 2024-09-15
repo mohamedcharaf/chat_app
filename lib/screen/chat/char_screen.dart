@@ -1,129 +1,247 @@
-// ignore_for_file: prefer_const_constructors, unnecessary_import, implementation_imports
+// ignore_for_file: prefer_const_constructors, unnecessary_import, implementation_imports, unused_local_variable, unused_import, unused_field
 
+import 'dart:async';
+import 'dart:io';
+
+import 'package:chat/firebase/FireData.dart';
+import 'package:chat/firebase/fire_storage.dart';
+import 'package:chat/model/msg_model.dart';
+import 'package:chat/model/user_model.dart';
+import 'package:chat/screen/chat/chat_message_card.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  final String roomId;
+  final ChatUser chatUser;
+  const ChatScreen({super.key, required this.roomId, required this.chatUser});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final _messagesStreamController = StreamController<List<Message>>.broadcast();
+  TextEditingController msgCon = TextEditingController();
+  final FireData1 fireData1 = FireData1();
+  List <String> selectedMsg = [];
+  List <String> copyMessage =[];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("Adel"),
-            Text(
-              "Last seen 11:28 am",
-              style: Theme.of(context).textTheme.labelLarge,
-            )
+        appBar: AppBar(
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.chatUser.name!),
+              Text(
+                widget.chatUser.lastActivated!,
+                style: Theme.of(context).textTheme.labelLarge,
+              )
+            ],
+          ),
+          actions: [
+
+           selectedMsg.isNotEmpty ? IconButton(onPressed: (
+
+            ) {
+              FireData1().deletMsg(widget.roomId,selectedMsg );
+              
+             
+            }, icon: const Icon(Icons.delete)) : SizedBox(),
+            const SizedBox(
+              width: 10,
+            ),
+          copyMessage.isNotEmpty ?  IconButton(onPressed: () {
+            Clipboard.setData(ClipboardData(text: copyMessage.join(" \n ")));
+         setState(() {
+               copyMessage.clear();
+             selectedMsg.clear();
+         });
+           
+          }, icon: const Icon(Icons.copy)): Container()
           ],
         ),
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.delete)),
-          const SizedBox(
-            width: 10,
-          ),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.copy))
-        ],
-      ),
-      body: 
-        Column(
-          
-          
+        body: Column(
           children: [
+            Expanded(
+              child: StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection('rooms')
+                    .doc(widget.roomId)
+                    .collection('messages')
+                    .orderBy('createdAt', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Text(
+                        'Une erreur s\'est produite : ${snapshot.error}');
+                  }
 
-            Expanded(child:
-             ListView.builder(
-              itemCount: 18,
-              reverse: true,
-              itemBuilder:(context, index) {
-             
+                  if (!snapshot.hasData) {
+                    return const CircularProgressIndicator(); // Afficher un indicateur de chargement
+                  }
+                  final messages = snapshot.data!.docs;
 
-               return  Row(
-                mainAxisAlignment:(index % 2 == 0 ? MainAxisAlignment.end : MainAxisAlignment.start),
-                children: [
-                  index % 2 == 0 ? Icon(Icons.edit) :SizedBox(),
-                  Card(
-                    shape:  RoundedRectangleBorder(borderRadius: BorderRadius.only(
-                      bottomLeft: const Radius.circular(19),
-                       bottomRight: const Radius.circular(19),
-                       topLeft: Radius.circular(index % 2 == 1 ? 0 : 19),
-                       topRight: Radius.circular(index % 2 == 0 ? 0 : 19),
-                    )),
-                    color:(index % 2 == 0 ? Colors.teal : Colors.tealAccent),
-                    
-                    child: Padding(padding: const EdgeInsets.all(12),
-                    child: Container(
-                      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width/2),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children:  [
-                          const Text("Message jhbjbjhbjbjbj knkffk sfnknknkn  nknkjnk nkdvk"),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text("06:12",style: Theme.of(context).textTheme.labelSmall),
-                              const SizedBox(width: 6,),
-                               index % 2 == 0 ? const Icon(Icons.check,size: 18,color: Color.fromARGB(133, 195, 213, 228),) : SizedBox(width: 0,) ,
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                    
-                    ),
-                  )
-                ],
-              );
-                
-              },
-           
-             
-           )),
-            
+// Mappez les documents de messages vers vos objets Message
+                  List<Message> messagesItems = snapshot.data!.docs
+                      .map((e) => Message.fromJson(e.data()))
+                      .toList()
+                    ..sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+                  return messagesItems.isNotEmpty
+                      ? ListView.builder(
+                          reverse:
+                              true, // Afficher les messages les plus récents en bas
+                          itemCount: messagesItems.length,
+                          itemBuilder: (context, index) {
+                            final message = messagesItems[index];
+                            return GestureDetector(
+                              onTap: (){
+                                setState(() {
+                                  if (selectedMsg.length > 0) {
+                                     selectedMsg.contains(messagesItems[index].id) ? selectedMsg.remove(messagesItems[index].id) :
+                                  selectedMsg.add(messagesItems[index].id!);
+
+                                  };
+                                    copyMessage.isNotEmpty? messagesItems[index].type == 'text' ? copyMessage.contains(messagesItems[index].msg) ? copyMessage.remove(messagesItems[index].msg!) : copyMessage.add(messagesItems[index].msg!) : null : null;
+
+                                  
+                                });
+                              },
+                              onLongPress: () {
+                                setState(() {
+                                  selectedMsg.contains(messagesItems[index].id) ? selectedMsg.remove(messagesItems[index].id) :
+                                  selectedMsg.add(messagesItems[index].id!);
+                                  print('**********************************');
+                                  print(selectedMsg);
+
+                                 messagesItems[index].type == 'text' ? copyMessage.contains(messagesItems[index].msg) ? copyMessage.remove(messagesItems[index].msg!) : copyMessage.add(messagesItems[index].msg!) : null;
+                                });
+                              },
+
+                              child: ChatMessageCard(
+                                selected:  selectedMsg.contains(messagesItems[index].id),
+                                messagesItems: message,
+                                index: index,
+                                roomId: widget.roomId,
+                              ),
+                            );
+                          },
+                        )
+                      : Center(
+                          child: GestureDetector(
+                            onTap: () => fireData1.sendMsg(widget.chatUser.id!,
+                                'salam Alikom', widget.roomId),
+                            child: Card(
+                              child: Padding(
+                                padding: EdgeInsets.all(16),
+                                child: Column(
+                                  // mainAxisSize:MainAxisSize.max,
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "👋",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .displayMedium,
+                                    ),
+                                    Text(
+                                      "Say Assalam Alikom",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                },
+              ),
+            ),
             Row(
               children: [
                 Expanded(
-                    child: Card(
-                  child: TextField(
-                    maxLines: 4,
-                    minLines: 1,
-                    decoration: InputDecoration(
-                        suffixIcon: Row( 
+                  child: Card(
+                    child: TextField(
+                      controller: msgCon,
+                      maxLines: 4,
+                      minLines: 1,
+                      decoration: InputDecoration(
+                        suffixIcon: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
                                 onPressed: () {},
                                 icon: const Icon(Icons.sentiment_satisfied)),
-                                  IconButton(
-                                onPressed: () {},
+                            IconButton(
+                                onPressed: () async {
+                                  print('Selecting image from gallery...');
+                                  ImagePicker picker = ImagePicker();
+                                  XFile? image = await picker.pickImage(
+                                      source: ImageSource.gallery);
+                                  if (image != null) {
+                                    print('Image selected: ${image.path}');
+                                    print(
+                                        'File size: ${await File(image.path).length()} bytes');
+                                    try {
+                                      String? imageUrl = await Future.any([
+                                        Firestorage().sendImage(
+                                            File(image.path),
+                                            widget.roomId,
+                                            widget.chatUser.id!),
+                                        Future.delayed(Duration(seconds: 60))
+                                            .then((_) => throw TimeoutException(
+                                                'Upload timeout'))
+                                      ]);
+                                    } catch (e) {
+                                      print('Error during image upload: $e');
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                              content: Text(
+                                                  'Erreur lors de l\'envoi de l\'image: $e')));
+                                    }
+                                  } else {
+                                    print('No image selected');
+                                  }
+                                },
                                 icon: const Icon(Icons.image)),
                           ],
                         ),
-                      
                         border: InputBorder.none,
                         hintText: "Message",
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16,vertical: 15),
-                            ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 15),
+                      ),
+                    ),
                   ),
                 ),
-                ),
-                IconButton(onPressed: (){}, icon: const Icon(Icons.send))
+                IconButton(
+                    onPressed: () {
+                      if (msgCon.text.isNotEmpty) {
+                        FireData1()
+                            .sendMsg(
+                                widget.chatUser.id!, msgCon.text, widget.roomId)
+                            .then((value) {
+                          setState(() {
+                            msgCon.text = "";
+                          });
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.send))
               ],
             )
           ],
-        )
-    );
-   
+        ));
   }
 }

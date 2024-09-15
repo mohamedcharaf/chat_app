@@ -37,13 +37,13 @@ class ForgetScreenState extends State<ForgetScreen> {
                 "Reset Password",
                 style: Theme.of(context)
                     .textTheme
-                    .headline6, // Adjust the font size as needed
+                    .titleLarge, // Adjust the font size as needed
               ),
               Text(
                 "Please enter your email",
                 style: Theme.of(context)
                     .textTheme
-                    .bodyText2, // Adjust the font size as needed
+                    .bodyMedium, // Adjust the font size as needed
               ),
               const SizedBox(height: 20),
               CustomFild(

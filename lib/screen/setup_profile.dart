@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import
+
 import 'package:chat/firebase/fire_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -59,12 +61,30 @@ class _SetupPorfileState extends State<SetupPorfile> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-               
-  onPressed: () async {
-    if (_nameController.text.isEmpty) {
-      await FireAuth.createUser();
+onPressed: () async {
+  if (_nameController.text.isNotEmpty) {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await user.updateDisplayName(_nameController.text);
+        await FireAuth.createUser(user);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Profile updated successfully')),
+        );
+      } else {
+        throw Exception('No user is currently signed in');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error updating profile: $e')),
+      );
     }
-  },
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Please enter a name')),
+    );
+  }
+},
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),

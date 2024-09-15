@@ -1,7 +1,12 @@
 // ignore_for_file: unnecessary_import, implementation_imports, unused_import
 
+import 'package:chat/model/groupe_model.dart';
 import 'package:chat/screen/chat/chat_card.dart';
+import 'package:chat/screen/group/create_group.dart';
+import 'package:chat/screen/group/create_group2.dart';
 import 'package:chat/screen/group/group_card.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
@@ -20,29 +25,10 @@ class _GroupHomeScreenState extends State<GroupHomeScreen> {
     return  Scaffold(
 
       floatingActionButton: FloatingActionButton(onPressed: () {
-        showBottomSheet(
-          context: context, builder: (context){
-          return Container(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children:  [
-                Row(
-                  // ignore: prefer_const_literals_to_create_immutables
-                  children: [
-                    const Text("enter friend email"),
-                  ],
-                ),
-                // CustomFild(label_:"text" , controller: emainCon, icon_: Icon(Icons.abc))
-              ],
-            ),
-
-          );
-
-        });
+       Navigator.push(context, MaterialPageRoute(builder: (context)=> CreateGroupScreen2()) );
         
       },
-      child: const Icon(Icons.message),
+      child: const Icon(Icons.add),
       ),
       appBar: AppBar(title: const Text("Group"),),
       body:  Padding(padding:  const EdgeInsets.all(20),
@@ -50,14 +36,27 @@ class _GroupHomeScreenState extends State<GroupHomeScreen> {
           children: [
              Expanded(
 
-               child:ListView.builder(
-                itemCount: 5,
-                 itemBuilder: (context,index) {
-                   return  const GroupCard();
+               child:StreamBuilder(
+                 stream: FirebaseFirestore.instance.collection('groups').where('members',arrayContains: FirebaseAuth.instance.currentUser!.uid  ).snapshots(),
+                 builder: (context, snapshot) {
+                  if(snapshot.hasData){
+                    List<GroupRoom> items = snapshot.data!.docs .map((e) => GroupRoom.fromJson(e.data())).toList()..sort((a,b)=>b.lastMessageTime.compareTo(a.lastMessageTime));
+                     return ListView.builder(
+                    
+                    itemCount: items.length,
+                     itemBuilder: (context,index) {
+                       return   GroupCard(chatGroup: items[index],);
+                     }
+                   );
+
+                  }else{
+                    return Container();
+                  }
+                  
                  }
                ),
              ),
-            // Divider(), // Ajoute une ligne de division entre les éléments de la liste
+            
           ],
         )),
     );

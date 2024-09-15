@@ -108,14 +108,14 @@ class LoginScreenState extends State<LoginScreen> {
                 ),
                 OutlinedButton(
                   onPressed: () async {
-                    //       Navigator.pushAndRemoveUntil(
-                    // context,
-                    // MaterialPageRoute(builder: (context) =>  SetupPorfile()),(route) => false);
+                          Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) =>  SetupPorfile()),(route) => false);
                     await FirebaseAuth.instance
                         .createUserWithEmailAndPassword(
                             email: controlleremail.text,
                             password: controllerpassword.text)
-                        .then((value) => FireAuth.createUser())
+                        .then((userCredential) => FireAuth.createUser(userCredential.user!))
                         .onError(
                           (error, stackTrace) => ScaffoldMessenger.of(context)
                               .showSnackBar(

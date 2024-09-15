@@ -1,133 +1,139 @@
-// ignore_for_file: library_private_types_in_public_api, use_key_in_widget_constructors, prefer_const_constructors, avoid_print, sort_child_properties_last, deprecated_member_use
+// import 'package:chat/model/user_model.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:flutter/material.dart';
+// import 'package:chat/firebase/FireData.dart';
 
-import 'package:flutter/material.dart';
+// class CreateGroupScreen extends StatefulWidget {
+//   @override
+//   _CreateGroupScreenState createState() => _CreateGroupScreenState();
+// }
 
-class CreateGroupScreen extends StatefulWidget {
-  @override
-  _CreateGroupScreenState createState() => _CreateGroupScreenState();
-}
+// class _CreateGroupScreenState extends State<CreateGroupScreen> {
+//   TextEditingController gNameCon = TextEditingController();
 
-class _CreateGroupScreenState extends State<CreateGroupScreen> {
-  TextEditingController gNameCon = TextEditingController();
+//   List<String> members = [
 
-  List<String> members = [
-    'Member 1',
-    'Member 2',
-    'Member 3',
-    'Member 4',
-    'Member 5',
-  ];
+//   ];
+//   List myContact =[];
 
-  List<bool> checkedList = [];
+//   List<bool> checkedList = [];
 
-  @override
-  void initState() {
-    super.initState();
-    if (members.isNotEmpty) {
-      // Initialisation de l'état de chaque case à cocher à false
-      for (var i = 0; i < members.length; i++) {
-        checkedList.add(false);
-      }
-    }
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     checkedList = List.generate(members.length, (_) => false);
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Create Group"),
-        backgroundColor: Colors.blue,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  backgroundImage: AssetImage('assets/placeholder_image.jpg'),
-                  radius: 30,
-                ),
-                SizedBox(width: 20),
-                Expanded(
-                  child: TextField(
-                    controller: gNameCon,
-                    decoration: InputDecoration(
-                      labelText: 'Group Name',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 30),
-            Text(
-              'Group Members',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue,
-              ),
-            ),
-            SizedBox(height: 10),
-            Expanded(
-              child: ListView.builder(
-                itemCount: members.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(members[index]),
-                    trailing: Checkbox(
-                      value: checkedList.isNotEmpty ? checkedList[index] : false,
-                      onChanged: (newValue) {
-                        setState(() {
-                          checkedList[index] = newValue!;
-                        });
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-            SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: canCreateGroup() ? () {
-                // Action à effectuer lorsque le bouton est pressé
-                print('Group name: ${gNameCon.text}');
-                print('Selected members: ${getSelectedMembers()}');
-              } : null,
-              child: Text('Create Group'),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.blue,
-                textStyle: TextStyle(fontSize: 18),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+//   int get selectedCount => checkedList.where((isChecked) => isChecked).length;
 
-  // Méthode pour obtenir les membres sélectionnés
-  List<String> getSelectedMembers() {
-    List<String> selectedMembers = [];
-    for (var i = 0; i < members.length; i++) {
-      if (checkedList.isNotEmpty && checkedList[i]) {
-        selectedMembers.add(members[i]);
-      }
-    }
-    return selectedMembers;
-  }
+//   bool get canCreateGroup => selectedCount >= 2 && gNameCon.text.isNotEmpty;
 
-  // Méthode pour vérifier si le groupe peut être créé
-  bool canCreateGroup() {
-    int selectedCount = 0;
-    for (var isChecked in checkedList) {
-      if (isChecked) {
-        selectedCount++;
-      }
-    }
-    return selectedCount >= 2;
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text("Create Group"),
+//         backgroundColor: Colors.blue,
+//       ),
+//       body: Padding(
+//         padding: const EdgeInsets.all(20.0),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Row(
+//               crossAxisAlignment: CrossAxisAlignment.center,
+//               children: [
+//                 CircleAvatar(
+//                   backgroundImage: AssetImage('assets/placeholder_image.jpg'),
+//                   radius: 30,
+//                 ),
+//                 SizedBox(width: 20),
+//                 Expanded(
+//                   child: TextField(
+//                     controller: gNameCon,
+//                     decoration: InputDecoration(
+//                       labelText: 'Group Name',
+//                       border: OutlineInputBorder(),
+//                     ),
+//                     onChanged: (_) => setState(() {}),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             SizedBox(height: 30),
+//             Text(
+//               'Group Members',
+//               style: TextStyle(
+//                 fontSize: 20,
+//                 fontWeight: FontWeight.bold,
+//                 color: Colors.blue,
+//               ),
+//             ),
+//             SizedBox(height: 10),
+//             Expanded(
+//              child:   StreamBuilder(
+//                   stream: FirebaseFirestore.instance
+//                       .collection('users')
+//                       .doc(FirebaseAuth.instance.currentUser!.uid)
+//                       .snapshots(),
+//                   builder: (context, snapshot) {
+//                     myContact = snapshot.data!.data()!['my_users'];
+//                     if (snapshot.hasData) {
+                      
+//                       return StreamBuilder<QuerySnapshot>(
+//                           stream: FirebaseFirestore.instance
+//                               .collection('users')
+//                               .where('id', whereIn: myContact.isNotEmpty ? myContact : [''])
+//                               .snapshots(),
+//                           builder: (context, snapshot) {
+//                             if (snapshot.hasData) {
+//                               final List<ChatUser> items = snapshot.data!.docs
+//                                   .map((e) => ChatUser.fromJson(
+//                                       e.data() as Map<String, dynamic>))
+//                                      .where((element) => element.id != FirebaseAuth.instance.currentUser!.uid).toList()
+//                                    ;
+//                               return ListView.builder(
+//                                   itemCount: items.length,
+//                                   itemBuilder: ((context, index) {
+//                                     return CheckboxListTile( checkboxShape: CircleBorder(), title: Text(items[index].name!),  value: true, onChanged: (value){}) ;
+//                                   }
+//                                   )
+//                                   );
+//                             } else
+//                               return Center(child: CircularProgressIndicator());
+//                           }
+//                           );
+//                     } else
+//                       return Container();
+//                   }),
+//             ),
+//             SizedBox(height: 30),
+//             if (canCreateGroup)
+//               ElevatedButton(
+//                 onPressed: createGroup,
+//                 child: Text('Create Group'),
+//                 style: ElevatedButton.styleFrom(
+            
+//                   padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+//                 ),
+//               ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   void createGroup() {
+//     List<String> selectedMembers = getSelectedMembers();
+//     FireData1().creatGroup(gNameCon.text, selectedMembers);
+//     // Ajoutez ici la logique pour naviguer vers l'écran suivant ou afficher un message de confirmation
+//   }
+
+//   List<String> getSelectedMembers() {
+//     return [
+//       for (int i = 0; i < members.length; i++)
+//         if (checkedList[i]) members[i]
+//     ];
+//   }
+// }

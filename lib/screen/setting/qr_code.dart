@@ -23,13 +23,13 @@ class _QrCodeState extends State<QrCode> {
   body: Center(
   child: SingleChildScrollView(
     child: Card(
-      child: QrImage(
-        data: '123456789',
-        version: QrVersions.auto,
-        size: 200.0
+      // child: QrImage(
+      //   data: '123456789',
+      //   version: QrVersions.auto,
+      //   size: 200.0
 
         
-      ),
+      // ),
     ),
   ),
 ),

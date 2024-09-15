@@ -1,9 +1,12 @@
-import 'package:badges/badges.dart';
-import 'package:chat/screen/group/group_screen.dart';
 import 'package:flutter/material.dart';
 
+import 'package:chat/model/groupe_model.dart';
+import 'package:chat/screen/group/group_screen.dart';
+
 class GroupCard extends StatelessWidget {
-  const GroupCard({Key? key}) : super(key: key);
+  final GroupRoom chatGroup;
+
+  const GroupCard({Key? key, required this.chatGroup}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -12,34 +15,26 @@ class GroupCard extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const GroupScreen()),
+            MaterialPageRoute(builder: (context) =>  GroupScreen(chatGroup: chatGroup,)),
           );
         },
-        leading: const CircleAvatar(
-          backgroundColor: Colors.blue, // Ajout de la couleur de fond
-          child: Icon(
-            Icons.group,
-            color: Colors.white, // Couleur de l'icône
+        leading: CircleAvatar(
+          backgroundColor: Colors.amber,
+          child: Text(
+            chatGroup.name.characters.first.toUpperCase() ,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
+
         ),
-        title: const Text(
-          "Group Name",
-          style: TextStyle(fontWeight: FontWeight.bold), // Ajout de la police en gras
+        title: Text(
+          chatGroup.name ,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        subtitle: const Text(
-          "Last Message Here",
-          style: TextStyle(color: Colors.grey), // Couleur du sous-titre
+        subtitle:  Text(
+          chatGroup.lastMessage == "" ? 'no msg ' : chatGroup.lastMessage, // Placeholder text, replace with actual last message if available
+          style: const TextStyle(color: Colors.grey),
         ),
-        trailing: const Badge(
-          // badgeColor: Colors.red, // Couleur du badge
-          badgeContent: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4.0),
-            child: Text(
-              "3",
-              style: TextStyle(color: Colors.white), // Couleur du texte du badge
-            ),
-          ),
-        ),
+        
       ),
     );
   }

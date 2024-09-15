@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, unnecessary_import, implementation_imports
 
+import 'package:chat/firebase/FireData.dart';
+import 'package:chat/model/groupe_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -7,13 +9,15 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'group_member.dart';
 
 class GroupScreen extends StatefulWidget {
-  const GroupScreen({super.key});
+  final GroupRoom chatGroup ;
+  const GroupScreen({super.key, required this.chatGroup});
 
   @override
   State<GroupScreen> createState() => _GroupScreenState();
 }
 
 class _GroupScreenState extends State<GroupScreen> {
+  TextEditingController msgCon = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,6 +106,7 @@ class _GroupScreenState extends State<GroupScreen> {
                 Expanded(
                     child: Card(
                   child: TextField(
+                    controller: msgCon,
                     maxLines: 4,
                     minLines: 1,
                     decoration: InputDecoration(
@@ -126,7 +131,16 @@ class _GroupScreenState extends State<GroupScreen> {
                   ),
                 ),
                 ),
-                IconButton(onPressed: (){}, icon: const Icon(Icons.send))
+                IconButton.filled(onPressed: (){
+                  if(msgCon.text.isNotEmpty){
+                    FireData1().sendGMsg(msgCon.text,widget.chatGroup.id ).then((value){
+                      setState(() {
+                        msgCon.text = "" ;
+                      });
+                    });
+
+                  }
+                }, icon: const Icon(Icons.send))
               ],
             )
           ],

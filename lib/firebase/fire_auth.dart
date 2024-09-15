@@ -1,29 +1,35 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: unnecessary_null_comparison
 
-import 'package:chat/distance/user_model.dart';
+import 'package:chat/model/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FireAuth {
-  static FirebaseAuth auth = FirebaseAuth.instance;
-  static FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
-  static User user = auth.currentUser!;
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  static Future createUser() async {
-   
-      ChatUser chatUser = ChatUser(
+  static Future createUser(User user) async {
+    if (user == null) {
+      throw Exception('User is null');
+    }
+
+    try {
+      final chatUser = ChatUser(
         id: user.uid,
         name: user.displayName ?? "",
         email: user.email ?? "",
         about: "Hello, I'm in Nabil's Course",
-        image: "",
-        createdAt: DateTime.now().toString(),
-        lastActivated: DateTime.now().toString(),
-        pushToken: "",
-        online: false,
+        image: null, // Utiliser null au lieu d'une chaîne vide
+        createdAt: DateTime.now().millisecondsSinceEpoch.toString(),
+        lastActivated: DateTime.now().millisecondsSinceEpoch.toString(),
+        pushToken: null, // Utiliser null au lieu d'une chaîne vide
+        online: false, myUsers: [],
       );
 
-      await firebaseFirestore.collection('users').doc(user.uid).set(chatUser.toJson());
-  
+      await _firestore.collection('users').doc(user.uid).set(chatUser.toJson());
+    } catch (e) {
+      // Gérer les erreurs liées à l'écriture dans Firestore
+      print('Error creating user: $e');
+      rethrow;
+    }
   }
 }
