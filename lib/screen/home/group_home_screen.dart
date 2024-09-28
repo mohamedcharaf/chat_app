@@ -1,10 +1,12 @@
 // ignore_for_file: unnecessary_import, implementation_imports, unused_import
 
 import 'package:chat/model/groupe_model.dart';
+import 'package:chat/model/room_model.dart';
 import 'package:chat/screen/chat/chat_card.dart';
 import 'package:chat/screen/group/create_group.dart';
 import 'package:chat/screen/group/create_group2.dart';
 import 'package:chat/screen/group/group_card.dart';
+import 'package:chat/screen/group/group_member.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -20,6 +22,7 @@ class GroupHomeScreen extends StatefulWidget {
 }
 
 class _GroupHomeScreenState extends State<GroupHomeScreen> {
+  late final ChatRoom chatgroup ;
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
@@ -30,7 +33,14 @@ class _GroupHomeScreenState extends State<GroupHomeScreen> {
       },
       child: const Icon(Icons.add),
       ),
-      appBar: AppBar(title: const Text("Group"),),
+      appBar: AppBar(title: const Text("Group"),  actions: const [
+          // IconButton(
+          //   icon: const Icon(Icons.person),
+          //   onPressed: () {
+          //     //  Navigator.push(context, MaterialPageRoute(builder: (context)=> GroupMember(chatgroup: ,)));
+          //   },
+          // ),
+        ], ),
       body:  Padding(padding:  const EdgeInsets.all(20),
        child: Column(
           children: [

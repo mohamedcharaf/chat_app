@@ -1,7 +1,7 @@
+import 'package:chat/screen/group/group_screen2.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chat/model/groupe_model.dart';
-import 'package:chat/screen/group/group_screen.dart';
 
 class GroupCard extends StatelessWidget {
   final GroupRoom chatGroup;
@@ -15,7 +15,7 @@ class GroupCard extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) =>  GroupScreen(chatGroup: chatGroup,)),
+            MaterialPageRoute(builder: (context) =>  GroupScreen2(chatGroup: chatGroup,)),
           );
         },
         leading: CircleAvatar(
